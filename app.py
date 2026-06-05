@@ -1,5 +1,7 @@
 from ctypes import cast
 import random
+import math
+from math import acos
 
 import pyxel
 from pyxel.pyxel_binding import mouse
@@ -13,12 +15,12 @@ class Main:
 
         # Jeu
         self.lvl = 1
+        self.nbDeaths = 0
         self.gold = 100
 
         # Obj
         self.castle = Castle(10,0)
         self.cave = Castle(10, 128-16)
-        self.objToDraw = [self.cave]
         self.objWithProgBar = [self.castle, self.cave]
         self.posTextMessage  = 128
 
@@ -30,22 +32,40 @@ class Main:
         # Run
         pyxel.run(self.update, self.draw)
 
+
     def enemyCreation(self):
-        if pyxel.frame_count % 75 == 0:
-            self.enemy_list.append(Enemy(1, self.cave.x+(self.cave.height/2), self.cave.y-7))
+        if pyxel.frame_count % (60/self.lvl) == 0:
+            self.enemy_list.append(Enemy(1, self.cave.x + 60, self.cave.y))
 
     def towerCreation(self):
         if pyxel.btnr(pyxel.KEY_UP) and self.gold >= Tower.cost:
             self.gold -= Tower.cost
             self.tower_list.append(Tower(1, pyxel.mouse_x, pyxel.mouse_y, 5, "0", "kjb"))
 
- 
+    def collisions(self):
+        for enemy in self.enemy_list:
+            for bullet in self.bullet_list:
+                if bullet.x >= enemy.x and bullet.x <= enemy.x + enemy.width and bullet.y >= enemy.y and bullet.y <= enemy.y + enemy.height:
+                    self.deadEnemy(enemy, bullet)
 
+    def deadEnemy(self, enemy, bullet):
+        self.bullet_list.remove(bullet)
+        if enemy in self.enemy_list:
+            self.enemy_list.remove(enemy)
+        self.gold += enemy.loot
+        self.nbDeaths += 1
+
+    def levelUp(self):
+        if (self.nbDeaths % 11 == 0) and self.nbDeaths > 0:
+            self.lvl +=1
+            self.nbDeaths += 1
 
 
     def update(self):
         self.enemyCreation()
         self.towerCreation()
+        self.collisions()
+        self.levelUp()
         for enemy in self.enemy_list:
             if enemy.move() == False:
                 self.castle.pv -= enemy.damage
@@ -53,29 +73,27 @@ class Main:
                     self.CastleDectruction()
                 self.enemy_list.remove(enemy)
         for tower in self.tower_list:
-            shoot = tower.shoot()
-            if shoot != None:
-                self.bullet_list.append(shoot)
+            if pyxel.frame_count % 45 == 0:
+                self.bullet_list.append(tower.shoot(self.enemy_list))
         for bullet in self.bullet_list:
             bullet.move()
+            if bullet.target not in self.enemy_list:
+                self.bullet_list.remove(bullet)
 
 
     def draw(self):
         pyxel.cls(0)
         pyxel.bltm(0, 0, 0, 0, 0, 256, 256)
-        for obj in self.objToDraw:
-            pyxel.rect(obj.x, obj.y, obj.height, obj.width, 9)
         for enemy in self.enemy_list:
             if pyxel.frame_count % enemy.time_ani == 0:
                 enemy.animation = 8
             else:
                 enemy.animation = 0
-            pyxel.blt(enemy.x, enemy.y, enemy.image, enemy.props[self.lvl-1][0] + enemy.animation, enemy.props[self.lvl-1][1], 8, 8, 15, 0, enemy.scale)
-        for tower in self.tower_list:
-            pyxel.rect(tower.x, tower.y, 8, 8, 9)
+            pyxel.blt(enemy.x, enemy.y, enemy.image, enemy.props[(self.lvl-1)%5][0] + enemy.animation, enemy.props[(self.lvl-1)%5][1], 8, 8, 15, 0, enemy.scale)
         for bullet in self.bullet_list:
-            pyxel.rect(bullet.x, bullet.y, 1, 5, 9)
-        pyxel.blt(0, 32, 0, 0, 104, 8, 8)
+            pyxel.blt(bullet.x, bullet.y, 0, 16, 104, 1, 5, 0, bullet.rotation)
+        for tower in self.tower_list:
+            pyxel.blt(tower.x, tower.y, 0, 25, 112, 6, 8, 5)
 
         pyxel.rect(5, 5, 5, 5, 10)
         pyxel.text(12, 5, str(self.gold), 0)
@@ -83,10 +101,6 @@ class Main:
             self.start_message()
         else:
             self.progression_bare()
-
-
-
-
 
 
     def progression_bare(self):
@@ -101,7 +115,7 @@ class Main:
 
 
     def start_message(self):
-        pyxel.text(self.posTextMessage, 121, "Appuyez sur la touche 'fleche du haut' pour poser des tourelles. Cout : 10 gold", 0)
+        pyxel.text(self.posTextMessage, 121, "Appuyez sur la touche 'fleche du haut' pour poser des tourelles. Cout : 10 gold", 7)
         self.posTextMessage -= 1
 
 
@@ -176,18 +190,54 @@ class Tower:
         self.x = x
         self.y = y
 
-    def shoot(self):
-        if pyxel.frame_count % 30 == 0:
-            return Proj(self.x, self.y, self.damage)
+    def shoot(self, enemy):
+        bullet = Proj(self.x, self.y, self.damage)
+        bullet.findCloseEnemy(enemy)
+        return bullet
+
+
 
 class Proj:
     def __init__(self, x, y, damage):
         self.x = x
         self.y = y
         self.damage = damage
+        self.target = None
+        self.rotation = 0
+
+    def findCloseEnemy(self, enemys):
+        dist = 1000
+        for enemy in enemys:
+            if (self.x - enemy.x)**2 + (self.y - enemy.y)**2 < dist:
+                dist = (self.x - enemy.x)**2 + (self.y - enemy.y)**2
+                self.target = enemy
 
     def move(self):
-        self.y += 1
+        if self.target != None:
+            try:
+                dx = (self.target.x - self.x) / math.sqrt((self.target.x - self.x) ** 2 + (self.target.y - self.y) ** 2)
+            except ZeroDivisionError:
+                dx = 0
+            try:
+                dy = (self.target.y - self.y) / math.sqrt((self.target.x - self.x) ** 2 + (self.target.y - self.y) ** 2)
+            except ZeroDivisionError:
+                dy = 0
+            self.x += dx
+            self.y += dy
+            r = 1/math.sqrt(dx**2 + dy**2)
+            # We want to calcukate the angle made by dx and dy:
+            costheta = dx/r
+            sintheta = dy/r
+            if costheta >= 0 and sintheta >= 0:
+                theta = -acos(dx/r)+math.pi
+            elif costheta >= 0 and sintheta <= 0:
+                theta = acos(dx/r)
+            elif costheta <= 0 and sintheta >= 0:
+                theta = -acos(dx/r)
+            elif costheta <= 0 and sintheta <= 0:
+                theta = -acos(dx/r)+math.pi/2
+            theta = theta%(2*math.pi)
+            self.rotation = (theta*360)/(2*math.pi)
 
 
 
