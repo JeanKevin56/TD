@@ -20,6 +20,7 @@ class Main:
         self.cave = Castle(10, 128-16)
         self.objToDraw = [self.cave]
         self.objWithProgBar = [self.castle, self.cave]
+        self.posTextMessage  = 128
 
         # Entity
         self.enemy_list = []
@@ -64,7 +65,6 @@ class Main:
         pyxel.bltm(0, 0, 0, 0, 0, 256, 256)
         for obj in self.objToDraw:
             pyxel.rect(obj.x, obj.y, obj.height, obj.width, 9)
-        self.progression_bare()
         for enemy in self.enemy_list:
             if pyxel.frame_count % enemy.time_ani == 0:
                 enemy.animation = 8
@@ -79,6 +79,10 @@ class Main:
 
         pyxel.rect(5, 5, 5, 5, 10)
         pyxel.text(12, 5, str(self.gold), 0)
+        if self.posTextMessage > -330:
+            self.start_message()
+        else:
+            self.progression_bare()
 
 
 
@@ -86,9 +90,20 @@ class Main:
 
 
     def progression_bare(self):
+        i = 1
+        deplacement = 0
         for obj in self.objWithProgBar:
-            pyxel.rect(obj.x+(128/30)*10, obj.y+3, obj.pv/100 * (128/30*10), 4, 11)
-            pyxel.rectb(obj.x+(128/30)*10-1, obj.y+3, (128/30*10)+2, 4, 0)
+            if i == 2:
+                deplacement = 7
+            i+=1
+            pyxel.rect(obj.x+(128/30)*10, obj.y+3+deplacement, obj.pv/100 * (128/30*10), 4, 11)
+            pyxel.rectb(obj.x+(128/30)*10-1, obj.y+3+deplacement, (128/30*10)+2, 4, 0)
+
+
+    def start_message(self):
+        pyxel.text(self.posTextMessage, 121, "Appuyez sur la touche 'fleche du haut' pour poser des tourelles. Cout : 10 gold", 0)
+        self.posTextMessage -= 1
+
 
         
 
