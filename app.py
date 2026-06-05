@@ -2,21 +2,22 @@ from ctypes import cast
 import random
 
 import pyxel
+from pyxel.pyxel_binding import mouse
 
 class Main:
     def __init__(self):
         # Pyxel
         pyxel.init(128,128,title="Tower Defence, protect your gold")
         pyxel.load("U4.pyxres")
-        self.tower = Tower(1, 5, "sfes", "kjb")
+        pyxel.mouse(True)
 
         # Jeu
         self.lvl = 1
         self.gold = 100
 
         # Obj
-        self.castle = Castle(self.lvl, 0)
-        self.cave = Castle(self.lvl, 128-16)
+        self.castle = Castle(10,0)
+        self.cave = Castle(10, 128-16)
         self.objToDraw = [self.castle, self.cave]
 
         # Entity
@@ -24,33 +25,37 @@ class Main:
         self.tower_list = []
         self.bullet_list = []
 
-        self.tower_list.append(self.tower)
-
-
         # Run
         pyxel.run(self.update, self.draw)
 
     def enemyCreation(self):
-        if pyxel.frame_count % 60 == 0:
+        if pyxel.frame_count % 75 == 0:
             self.enemy_list.append(Enemy(1, self.cave.x, self.cave.y))
 
+    def towerCreation(self):
+        if pyxel.btnr(pyxel.KEY_UP) and self.gold >= Tower.cost:
+            self.gold -= Tower.cost
+            self.tower_list.append(Tower(1, pyxel.mouse_x, pyxel.mouse_y, 5, "0", "kjb"))
 
 
     def update(self):
         self.enemyCreation()
+        self.towerCreation()
         for enemy in self.enemy_list:
             if enemy.move() == False:
-                self.enemy_list.remove(enemy)
                 self.castle.pv -= enemy.damage
+                self.enemy_list.remove(enemy)
         for tower in self.tower_list:
             shoot = tower.shoot()
             if shoot != None:
                 self.bullet_list.append(shoot)
-        #for bullet in self.bullet_list:
-            #bullet.move()
+        for bullet in self.bullet_list:
+            bullet.move()
+
 
     def draw(self):
         pyxel.cls(0)
+        pyxel.bltm(0, 0, 0, 0, 0, 256, 256)
         for obj in self.objToDraw:
             pyxel.rect(obj.x, obj.y, obj.height, obj.width, 9)
         self.progression_bare()
@@ -64,16 +69,21 @@ class Main:
             pyxel.rect(tower.x, tower.y, 8, 8, 9)
         for bullet in self.bullet_list:
             pyxel.rect(bullet.x, bullet.y, 1, 5, 9)
+        pyxel.blt(0, 32, 0, 0, 104, 8, 8)
+
 
     def progression_bare(self):
         for obj in self.objToDraw:
-            pyxel.rect(obj.x+5, obj.y+(obj.height/3), obj.height/3, obj.pv*2, 11)
+            pyxel.rect(obj.x+(128/30)*10, obj.y+6, obj.pv/100 * (128/30*10), 4, 11)
+            pyxel.rectb(obj.x+(128/30)*10-1, obj.y+6, (128/30*10)+2, 4, 0)
+
+        
 
 
 
 class Entity:
     def __init__(self, lvl, x, y):
-        self.pv = 5 * lvl
+        self.pv = 10 * lvl
         self.damage = 5 * lvl
         self.x = x
         self.y = y
@@ -112,7 +122,7 @@ class Enemy(Entity):
                 else:
                     self.x -= deplacement
             else:
-                deplacement = random.randint(1, 2)
+                deplacement = random.randint(2, 3)
                 if (self.y - deplacement <= 16):
                     return False
                 else:
@@ -129,13 +139,14 @@ class Castle(Entity):
         self.width = 16
 
 class Tower:
-    def __init__(self, lvl, damages, prop, proj):
+    cost = 10
+    def __init__(self, lvl, x, y, damages, prop, proj):
         self.lvl = lvl
         self.damage = damages * lvl
         self.prop = prop
         self.proj = proj
-        self.x = 0
-        self.y = 0
+        self.x = x
+        self.y = y
 
     def shoot(self):
         if pyxel.frame_count % 30 == 0:
@@ -147,10 +158,9 @@ class Proj:
         self.y = y
         self.damage = damage
 
-    #def move(self):
+    def move(self):
+        self.y += 1
 
 
 
 Main()
-
-
