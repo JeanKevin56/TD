@@ -44,6 +44,25 @@ class Enemy(Entity):
         self.loot = 1 * lvl
 
 
+    def move(self):
+        if(random.randint(0,100) < 20):
+            deplacement = random.randint(2,4)
+            if(self.x+ 4 + deplacement > 128):
+                self.x -= deplacement
+            elif (self.x - deplacement < 0):
+                self.x += deplacement
+            elif(random.randint(1,2)==1):
+                self.x += deplacement
+            else:
+                self.x -= deplacement
+        else:
+            deplacement = random.randint(1,2)
+            if(self.y - deplacement<=16):
+                return "caboom"
+            else: 
+                self.y -= deplacement
+
+
 class Ally(Entity):
     def __init__(self, lvl, x, y):
         super().__init__(lvl, x, y)
