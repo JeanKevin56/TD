@@ -29,11 +29,12 @@ class Main:
             self.enemy_list.append(Enemy(1, self.cave.x, self.cave.y))
             print("isbgfr")
 
-
     def update(self):
-        self.enemyCreation()
-        for enemy in self.enemy_list:
-            enemy.move()
+        if pyxel.frame_count % 5 == 0:
+            if pyxel.frame_count % 8 == 0:
+                self.enemyCreation()
+            for enemy in self.enemy_list:
+                enemy.move()
 
     def draw(self):
         pyxel.cls(0)
