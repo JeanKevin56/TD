@@ -8,6 +8,7 @@ from pyxel.pyxel_binding import mouse
 
 class Main:
     def __init__(self):
+        
         # Pyxel
         pyxel.init(128,128,title="Tower Defence, protect your gold")
         pyxel.load("U4.pyxres")
@@ -34,7 +35,10 @@ class Main:
 
 
     def enemyCreation(self):
-        if pyxel.frame_count % (60/self.lvl) == 0:
+        if self.lvl >= 60 :
+            self.lvl = 60
+
+        if pyxel.frame_count % round(60/self.lvl) == 0:
             self.enemy_list.append(Enemy(1, self.cave.x + 60, self.cave.y))
 
     def towerCreation(self):
@@ -51,9 +55,11 @@ class Main:
     def deadEnemy(self, enemy, bullet):
         self.bullet_list.remove(bullet)
         if enemy in self.enemy_list:
-            self.enemy_list.remove(enemy)
-        self.gold += enemy.loot
-        self.nbDeaths += 1
+            enemy.pv -= bullet.damage
+            if enemy.pv <= 0:
+                self.enemy_list.remove(enemy)
+                self.gold += enemy.loot
+                self.nbDeaths += 1
 
     def levelUp(self):
         if (self.nbDeaths % 11 == 0) and self.nbDeaths > 0:
@@ -117,7 +123,7 @@ class Main:
 
 
     def start_message(self):
-        pyxel.text(self.posTextMessage, 121, "Appuyez sur la touche 'fleche du haut' pour poser des tourelles. Cout : 10 gold", 7)
+        pyxel.text(self.posTextMessage, 121, "Appuyez sur la touche 'fleche du haut' pour poser des tourelles. Cout : 15 gold", 7)
         self.posTextMessage -= 1
 
 
