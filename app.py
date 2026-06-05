@@ -69,8 +69,6 @@ class Main:
         for enemy in self.enemy_list:
             if enemy.move() == False:
                 self.castle.pv -= enemy.damage
-                if self.castle.pv < 0:
-                    self.CastleDectruction()
                 self.enemy_list.remove(enemy)
         for tower in self.tower_list:
             if pyxel.frame_count % 45 == 0:
@@ -82,25 +80,29 @@ class Main:
 
 
     def draw(self):
+        
         pyxel.cls(0)
-        pyxel.bltm(0, 0, 0, 0, 0, 256, 256)
-        for enemy in self.enemy_list:
-            if pyxel.frame_count % enemy.time_ani == 0:
-                enemy.animation = 8
-            else:
-                enemy.animation = 0
-            pyxel.blt(enemy.x, enemy.y, enemy.image, enemy.props[(self.lvl-1)%5][0] + enemy.animation, enemy.props[(self.lvl-1)%5][1], 8, 8, 15, 0, enemy.scale)
-        for bullet in self.bullet_list:
-            pyxel.blt(bullet.x, bullet.y, 0, 16, 104, 1, 5, 0, bullet.rotation)
-        for tower in self.tower_list:
-            pyxel.blt(tower.x, tower.y, 0, 25, 112, 6, 8, 5)
-
-        pyxel.rect(5, 5, 5, 5, 10)
-        pyxel.text(12, 5, str(self.gold), 0)
-        if self.posTextMessage > -330:
-            self.start_message()
+        if self.castle.pv < 0:
+            pyxel.bltm(0, 0, 0, 0, 16*8, 256, 256)
         else:
-            self.progression_bare()
+            pyxel.bltm(0, 0, 0, 0, 0, 256, 256)
+            for enemy in self.enemy_list:
+                if pyxel.frame_count % enemy.time_ani == 0:
+                    enemy.animation = 8
+                else:
+                    enemy.animation = 0
+                pyxel.blt(enemy.x, enemy.y, enemy.image, enemy.props[(self.lvl-1)%5][0] + enemy.animation, enemy.props[(self.lvl-1)%5][1], 8, 8, 15, 0, enemy.scale)
+            for bullet in self.bullet_list:
+                pyxel.blt(bullet.x, bullet.y, 0, 16, 104, 1, 5, 0, bullet.rotation)
+            for tower in self.tower_list:
+                pyxel.blt(tower.x, tower.y, 0, 25, 112, 6, 8, 5)
+
+            pyxel.rect(5, 5, 5, 5, 10)
+            pyxel.text(12, 5, str(self.gold), 0)
+            if self.posTextMessage > -330:
+                self.start_message()
+            else:
+                self.progression_bare()
 
 
     def progression_bare(self):
@@ -135,6 +137,7 @@ class Entity:
 class Enemy(Entity):
     def __init__(self, lvl, x, y):
         super().__init__(lvl, x, y)
+        self.pv = 6
         self.scale = 1
         self.loot = 1 * lvl
         self.image = 0
@@ -181,7 +184,7 @@ class Castle(Entity):
         self.width = 16
 
 class Tower:
-    cost = 10
+    cost = 15
     def __init__(self, lvl, x, y, damages, prop, proj):
         self.lvl = lvl
         self.damage = damages * lvl
@@ -224,7 +227,10 @@ class Proj:
                 dy = 0
             self.x += dx
             self.y += dy
-            r = 1/math.sqrt(dx**2 + dy**2)
+            try:
+                r = 1/math.sqrt(dx**2 + dy**2)
+            except ZeroDivisionError :
+                r = 1
             # We want to calcukate the angle made by dx and dy:
             costheta = dx/r
             sintheta = dy/r
