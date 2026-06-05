@@ -18,7 +18,8 @@ class Main:
         # Obj
         self.castle = Castle(10,0)
         self.cave = Castle(10, 128-16)
-        self.objToDraw = [self.castle, self.cave]
+        self.objToDraw = [self.cave]
+        self.objWithProgBar = [self.castle, self.cave]
 
         # Entity
         self.enemy_list = []
@@ -73,7 +74,7 @@ class Main:
 
 
     def progression_bare(self):
-        for obj in self.objToDraw:
+        for obj in self.objWithProgBar:
             pyxel.rect(obj.x+(128/30)*10, obj.y+6, obj.pv/100 * (128/30*10), 4, 11)
             pyxel.rectb(obj.x+(128/30)*10-1, obj.y+6, (128/30*10)+2, 4, 0)
 
