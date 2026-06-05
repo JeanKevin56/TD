@@ -61,21 +61,26 @@ class Entity:
 class Enemy(Entity):
     def __init__(self, lvl, x, y):
         super().__init__(lvl, x, y)
-        self.scale = 1
         self.loot = 1 * lvl
-        self.image = 0
-        self.props = [(0, 64), (0, 72), (16, 64), (16, 72), (32, 64), (32, 72)]
-        self.animation = 0
-        self.time_ani = random.randint(1, 30)
+        right_or_left = random.randint(1,4)
+        if right_or_left == 1:
+            self.direction = 80
+        elif right_or_left == 2:
+            self.direction = 56
+        elif right_or_left == 3:
+            self.direction = 44
+        else:
+            self.direction = 20
+
 
     def move(self):
-        if (random.randint(0, 100) < 20):
-            deplacement = random.randint(2, 4)
-            if (self.x + 4 + deplacement > 128):
-                self.x -= deplacement
+        if (random.randint(0, 100) < 65):
+            deplacement = random.randint(1, 3)
+            if (self.x + 8 + deplacement > 128):
+                self.x -= (deplacement+10)
             elif (self.x - deplacement < 0):
-                self.x += deplacement
-            elif (random.randint(1, 2) == 1):
+                self.x += (deplacement+10)
+            elif (random.randint(0, 100) < self.direction):
                 self.x += deplacement
             else:
                 self.x -= deplacement
