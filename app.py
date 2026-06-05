@@ -5,19 +5,20 @@ import pyxel
 class Main:
     def __init__(self):
         pyxel.init(128,128,title="Tower Defence, protect your gold")
-        self.castle = Castle(100, 0,64,0, 8, 8)
-        self.cave = Castle(100, 0, 64, 128-8, 8, 8)
+        self.castle = Castle(1, 0,64)
+        self.cave = Castle(1, 0, 64)
         self.objToDraw = [self.castle, self.cave]
         self.enemy_list = []
         pyxel.run(self.update, self.draw)
 
     def enemyCreation(self):
         if (pyxel.frame_count % 30 == 0):
-            self.enemy_list.append(Enemy(25, 10, self.cave.x, self.cave.y, 8, 8))
+            self.enemy_list.append(Enemy(1, self.cave.x, self.cave.y))
 
 
     def update(self):
-        pass
+        for enemy in self.enemy_list:
+            enemy.move()
 
     def draw(self):
         pyxel.cls(0)
@@ -29,26 +30,27 @@ class Main:
 
 
 class Entity:
-    def __init__(self, pv, damage, x, y, height, width):
-        self.pv = pv
-        self.damage = damage
+    def __init__(self, lvl, x, y):
+        self.pv = 5 * lvl
+        self.damage = 5 * lvl
         self.x = x
         self.y = y
-        self.height = height
-        self.width = width
+        self.height = 8
+        self.width = 8
 
 class Enemy(Entity):
-    def __init__(self, pv, damage, x, y, height, width):
-        super().__init__(pv, damage, x, y, height, width)
+    def __init__(self, lvl, x, y):
+        super().__init__(lvl, x, y)
+        self.loot = 1 * lvl
 
 
 class Ally(Entity):
-    def __init__(self, pv, damage, x, y, height, width):
-        super().__init__(pv, damage, x, y, height, width)
+    def __init__(self, lvl, x, y):
+        super().__init__(lvl, x, y)
 
 class Castle(Entity):
-    def __init__(self, pv, damage, x, y, height, width):
-        super().__init__(pv, damage, x, y, height, width)
+    def __init__(self, lvl, x, y):
+        super().__init__(lvl, x, y)
 
 
 
