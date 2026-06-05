@@ -38,6 +38,9 @@ class Main:
             self.gold -= Tower.cost
             self.tower_list.append(Tower(1, pyxel.mouse_x, pyxel.mouse_y, 5, "0", "kjb"))
 
+ 
+
+
 
     def update(self):
         self.enemyCreation()
@@ -45,6 +48,8 @@ class Main:
         for enemy in self.enemy_list:
             if enemy.move() == False:
                 self.castle.pv -= enemy.damage
+                if self.castle.pv < 0:
+                    self.CastleDectruction()
                 self.enemy_list.remove(enemy)
         for tower in self.tower_list:
             shoot = tower.shoot()
@@ -71,6 +76,13 @@ class Main:
         for bullet in self.bullet_list:
             pyxel.rect(bullet.x, bullet.y, 1, 5, 9)
         pyxel.blt(0, 32, 0, 0, 104, 8, 8)
+
+        pyxel.rect(5, 5, 5, 5, 10)
+        pyxel.text(12, 5, str(self.gold), 0)
+
+
+
+
 
 
     def progression_bare(self):
