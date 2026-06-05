@@ -27,7 +27,7 @@ class Main:
         pyxel.run(self.update, self.draw)
 
     def enemyCreation(self):
-        if pyxel.frame_count % 60 == 0:
+        if pyxel.frame_count % 75 == 0:
             self.enemy_list.append(Enemy(1, self.cave.x, self.cave.y))
 
 
@@ -94,7 +94,7 @@ class Enemy(Entity):
                 else:
                     self.x -= deplacement
             else:
-                deplacement = random.randint(1, 2)
+                deplacement = random.randint(2, 3)
                 if (self.y - deplacement <= 16):
                     return False
                 else:
