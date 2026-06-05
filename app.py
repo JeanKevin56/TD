@@ -41,6 +41,7 @@ class Main:
         for enemy in self.enemy_list:
             if enemy.move() == False:
                 self.enemy_list.remove(enemy)
+                self.castle.pv -= enemy.damage
         for tower in self.tower_list:
             shoot = tower.shoot()
             if shoot != None:
@@ -52,6 +53,7 @@ class Main:
         pyxel.cls(0)
         for obj in self.objToDraw:
             pyxel.rect(obj.x, obj.y, obj.height, obj.width, 9)
+        self.progression_bare()
         for enemy in self.enemy_list:
             if pyxel.frame_count % enemy.time_ani == 0:
                 enemy.animation = 8
@@ -62,6 +64,10 @@ class Main:
             pyxel.rect(tower.x, tower.y, 8, 8, 9)
         for bullet in self.bullet_list:
             pyxel.rect(bullet.x, bullet.y, 1, 5, 9)
+
+    def progression_bare(self):
+        for obj in self.objToDraw:
+            pyxel.rect(obj.x+5, obj.y+(obj.height/3), obj.height/3, obj.pv*2, 11)
 
 
 
