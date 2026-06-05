@@ -30,11 +30,10 @@ class Main:
             print("isbgfr")
 
     def update(self):
-        if pyxel.frame_count % 5 == 0:
-            if pyxel.frame_count % 8 == 0:
-                self.enemyCreation()
-            for enemy in self.enemy_list:
-                enemy.move()
+        self.enemyCreation()
+        for enemy in self.enemy_list:
+            if enemy.move() == False:
+                self.enemy_list.remove(enemy)
 
     def draw(self):
         pyxel.cls(0)
@@ -75,22 +74,23 @@ class Enemy(Entity):
 
 
     def move(self):
-        if (random.randint(0, 100) < 65):
-            deplacement = random.randint(1, 3)
-            if (self.x + 8 + deplacement > 128):
-                self.x -= (deplacement+10)
-            elif (self.x - deplacement < 0):
-                self.x += (deplacement+10)
-            elif (random.randint(0, 100) < self.direction):
-                self.x += deplacement
+        if pyxel.frame_count % 5 == 0:
+            if (random.randint(0, 100) < 65):
+                deplacement = random.randint(1, 3)
+                if (self.x + 8 + deplacement > 128):
+                    self.x -= (deplacement+10)
+                elif (self.x - deplacement < 0):
+                    self.x += (deplacement+10)
+                elif (random.randint(0, 100) < self.direction):
+                    self.x += deplacement
+                else:
+                    self.x -= deplacement
             else:
-                self.x -= deplacement
-        else:
-            deplacement = random.randint(1, 2)
-            if (self.y - deplacement <= 16):
-                return "caboom"
-            else:
-                self.y -= deplacement
+                deplacement = random.randint(1, 2)
+                if (self.y - deplacement <= 16):
+                    return False
+                else:
+                    self.y -= deplacement
 
 class Ally(Entity):
     def __init__(self, lvl, x, y):
