@@ -8,13 +8,14 @@ class Main:
         # Pyxel
         pyxel.init(128,128,title="Tower Defence, protect your gold")
         pyxel.load("U4.pyxres")
+        self.tower = Tower(1, 5, "sfes", "kjb")
 
         # Jeu
         self.lvl = 1
         self.gold = 100
 
         # Obj
-        self.castle = Castle(self.lvl,0)
+        self.castle = Castle(self.lvl, 0)
         self.cave = Castle(self.lvl, 128-16)
         self.objToDraw = [self.castle, self.cave]
 
@@ -23,12 +24,16 @@ class Main:
         self.tower_list = []
         self.bullet_list = []
 
+        self.tower_list.append(self.tower)
+
+
         # Run
         pyxel.run(self.update, self.draw)
 
     def enemyCreation(self):
-        if pyxel.frame_count % 75 == 0:
+        if pyxel.frame_count % 60 == 0:
             self.enemy_list.append(Enemy(1, self.cave.x, self.cave.y))
+
 
 
     def update(self):
@@ -37,7 +42,11 @@ class Main:
             if enemy.move() == False:
                 self.enemy_list.remove(enemy)
         for tower in self.tower_list:
-            self.bullet_list.append(tower.shoot())
+            shoot = tower.shoot()
+            if shoot != None:
+                self.bullet_list.append(shoot)
+        #for bullet in self.bullet_list:
+            #bullet.move()
 
     def draw(self):
         pyxel.cls(0)
@@ -48,8 +57,11 @@ class Main:
                 enemy.animation = 8
             else:
                 enemy.animation = 0
-            print(enemy.x, enemy.y, enemy.image, enemy.props[self.lvl-1][0] + enemy.animation, enemy.props[self.lvl-1][1], enemy.height, enemy.width, 15)
             pyxel.blt(enemy.x, enemy.y, enemy.image, enemy.props[self.lvl-1][0] + enemy.animation, enemy.props[self.lvl-1][1], 8, 8, 15, 0, enemy.scale)
+        for tower in self.tower_list:
+            pyxel.rect(tower.x, tower.y, 8, 8, 9)
+        for bullet in self.bullet_list:
+            pyxel.rect(bullet.x, bullet.y, 1, 5, 9)
 
 
 
@@ -94,7 +106,7 @@ class Enemy(Entity):
                 else:
                     self.x -= deplacement
             else:
-                deplacement = random.randint(2, 3)
+                deplacement = random.randint(1, 2)
                 if (self.y - deplacement <= 16):
                     return False
                 else:
@@ -106,8 +118,8 @@ class Ally(Entity):
 
 class Castle(Entity):
     def __init__(self, lvl, y):
-        super().__init__(lvl, 64, y)
-        self.height = 16
+        super().__init__(lvl, 0, y)
+        self.height = 128
         self.width = 16
 
 class Tower:
@@ -128,6 +140,9 @@ class Proj:
         self.x = x
         self.y = y
         self.damage = damage
+
+    #def move(self):
+
 
 
 Main()
