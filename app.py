@@ -31,7 +31,7 @@ class Main:
 
     def enemyCreation(self):
         if pyxel.frame_count % 75 == 0:
-            self.enemy_list.append(Enemy(1, self.cave.x, self.cave.y))
+            self.enemy_list.append(Enemy(1, self.cave.x+(self.cave.height/2), self.cave.y-7))
 
     def towerCreation(self):
         if pyxel.btnr(pyxel.KEY_UP) and self.gold >= Tower.cost:
@@ -75,8 +75,8 @@ class Main:
 
     def progression_bare(self):
         for obj in self.objWithProgBar:
-            pyxel.rect(obj.x+(128/30)*10, obj.y+6, obj.pv/100 * (128/30*10), 4, 11)
-            pyxel.rectb(obj.x+(128/30)*10-1, obj.y+6, (128/30*10)+2, 4, 0)
+            pyxel.rect(obj.x+(128/30)*10, obj.y+3, obj.pv/100 * (128/30*10), 4, 11)
+            pyxel.rectb(obj.x+(128/30)*10-1, obj.y+3, (128/30*10)+2, 4, 0)
 
         
 
@@ -112,8 +112,8 @@ class Enemy(Entity):
 
     def move(self):
         if pyxel.frame_count % 5 == 0:
-            if (random.randint(0, 100) < 65):
-                deplacement = random.randint(1, 3)
+            if (random.randint(0, 100) < 75):
+                deplacement = random.randint(2, 4)
                 if (self.x + 8 + deplacement > 128):
                     self.x -= (deplacement + 10)
                 elif (self.x - deplacement < 0):
